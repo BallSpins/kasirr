@@ -75,6 +75,18 @@ $pelanggan = mysqli_query($conn,"SELECT * FROM pelanggan");
         total += parseInt(val) || 0;
       });
       document.getElementById("totalDisplay").innerText = "Total: Rp"+total.toLocaleString('id-ID');
+
+      // update kembalian jika ada input bayar
+      const bayarInput = document.getElementById("bayarInput");
+      if(bayarInput){
+        const bayar = parseInt(bayarInput.value) || 0;
+        const kembalian = bayar - total;
+        document.getElementById("kembalianDisplay").innerText = "Kembalian: Rp"+(kembalian >= 0 ? kembalian.toLocaleString('id-ID') : 0);
+      }
+    }
+
+    function updateKembalian(){
+      updateTotal();
     }
   </script>
 </head>
@@ -96,10 +108,23 @@ $pelanggan = mysqli_query($conn,"SELECT * FROM pelanggan");
 
       <button type="button" onclick="addRow()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Produk</button>
 
-      <p id="totalDisplay" class="text-right font-bold mb-4">Total: Rp0</p>
+      <p id="totalDisplay" class="text-right font-bold mb-2">Total: Rp0</p>
 
-      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Simpan Transaksi</button>
+            <div class="mb-4 text-right">
+        <label class="block mb-2 font-semibold text-left">Bayar</label>
+        <input type="number" name="bayar" id="bayarInput" 
+               class="border rounded p-2 w-full" 
+               placeholder="Masukkan jumlah bayar"
+               oninput="updateKembalian()">
+      </div>
+
+      <p id="kembalianDisplay" class="text-right font-bold mb-4">Kembalian: Rp0</p>
+
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        Simpan Transaksi
+      </button>
     </form>
   </div>
 </body>
 </html>
+       

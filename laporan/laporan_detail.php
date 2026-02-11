@@ -1,41 +1,56 @@
 <?php
 include '../config/koneksi.php';
+
+
 $id = $_GET['id'];
 
-$sql = "SELECT t.id, t.tgl, p.nama AS pelanggan, t.total
+// ambil data transaksi + pelanggan
+$sql = "SELECT t.id, t.tgl, p.nama AS pelanggan, p.no_telp, t.total, t.bayar, t.kembalian
         FROM transaksi t
         JOIN pelanggan p ON t.pelanggan_id = p.id
-        WHERE t.id = $id";
-$transaksi = mysqli_fetch_assoc(mysqli_query($conn, $sql));
+        WHERE t.id = '$id'";
+$result = mysqli_query($conn, $sql);
+$transaksi = mysqli_fetch_assoc($result);
 
-$sqlDetail = "SELECT pr.kode_produk, pr.nama, d.qty, d.subtotal
-              FROM transaksi_detail d
-              JOIN produk pr ON d.produk_id = pr.id
-              WHERE d.transaksi_id = $id";
+// ambil detail produk
+$sqlDetail = "SELECT td.qty, td.subtotal, pr.kode_produk, pr.nama AS produk
+              FROM transaksi_detail td
+              JOIN produk pr ON td.produk_id = pr.id
+              WHERE td.transaksi_id = '$id'";
 $resultDetail = mysqli_query($conn, $sqlDetail);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Detail Struk</title>
+  <title>Struk Pembayaran</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="bg-gray-100 min-h-screen flex">
+  <!-- Sidebar cukup sekali -->
   <?php include "../layout/sidebar.php"; ?>
+
+  <!-- Konten struk -->
   <div class="flex-1 p-6">
-    <div class="bg-white shadow-md rounded p-6 w-96">
-      <h2 class="text-xl font-bold mb-4 text-center">Struk #<?= $transaksi['id'] ?></h2>
-      <p><strong>Pelanggan:</strong> <?= $transaksi['pelanggan'] ?></p>
-      <p><strong>Tanggal:</strong> <?= $transaksi['tgl'] ?></p>
-      <hr class="my-4">
-      <?php while($d = mysqli_fetch_assoc($resultDetail)){ ?>
-        <div class="flex justify-between mb-2">
-          <span><?= $d['nama'] ?> (<?= $d['qty'] ?>)</span>
-          <span>Rp<?= number_format($d['subtotal']) ?></span>
+    <div class="max-w-md mx-auto bg-white shadow-md rounded p-6">
+      <h2 class="text-xl font-bold text-center mb-2">STRUK PEMBAYARAN</h2>
+      <hr class="mb-2">
+      <p>Struk #: <?= $transaksi['id'] ?></p>
+      <p>Tanggal: <?= $transaksi['tgl'] ?></p>
+      <p>Pelanggan: <?= $transaksi['pelanggan'] ?> (<?= $transaksi['no_telp'] ?>)</p>
+      <hr class="mb-2">
+
+      <!-- Detail produk per baris -->
+      <?php while($row = mysqli_fetch_assoc($resultDetail)){ ?>
+        <div class="flex justify-between">
+          <span><?= $row['kode_produk'] ?> - <?= $row['produk'] ?> x<?= $row['qty'] ?></span>
+          <span>Rp<?= number_format($row['subtotal']) ?></span>
         </div>
       <?php } ?>
-      <hr class="my-4">
-      <p><strong>Total:</strong> Rp<?= number_format($transaksi['total']) ?></p>
+
+      <hr class="mb-2">
+      <p class="text-right font-bold">Total: Rp<?= number_format($transaksi['total']) ?></p>
+      <p class="text-right">Bayar: Rp<?= number_format($transaksi['bayar']) ?></p>
+      <p class="text-right">Kembalian: Rp<?= number_format($transaksi['kembalian']) ?></p>
     </div>
   </div>
 </body>

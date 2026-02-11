@@ -4,7 +4,7 @@ $id = $_GET['id'];
 
 $t = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM transaksi WHERE id=$id"));
 $d = mysqli_query($conn,"
-    SELECT td.qty, td.subtotal, p.nama, p.harga
+    SELECT td.qty, td.subtotal, p.kode_produk, p.nama, p.harga
     FROM transaksi_detail td
     JOIN produk p ON td.produk_id = p.id
     WHERE td.transaksi_id = $id
@@ -15,7 +15,7 @@ $pelanggan = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM pelanggan WHER
 <html>
 <head>
   <title>Struk Pembayaran</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body onload="printAndRedirect()" class="bg-white p-6">
   <div class="max-w-md mx-auto">
@@ -27,13 +27,15 @@ $pelanggan = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM pelanggan WHER
     <div class="space-y-2 mb-4">
       <?php while($row = mysqli_fetch_assoc($d)) { ?>
         <div class="flex justify-between">
-          <span><?= $row['nama'] ?> x<?= $row['qty'] ?></span>
+          <span><?= $row['kode_produk'] ?> - <?= $row['nama'] ?> x<?= $row['qty'] ?></span>
           <span>Rp<?= number_format($row['subtotal']) ?></span>
         </div>
       <?php } ?>
     </div>
     <hr class="mb-2">
     <p class="text-right font-bold">Total: Rp<?= number_format($t['total']) ?></p>
+    <p class="text-right">Bayar: Rp<?= number_format($t['bayar']) ?></p>
+    <p class="text-right">Kembalian: Rp<?= number_format($t['kembalian']) ?></p>
   </div>
   <script>
     function printAndRedirect() {

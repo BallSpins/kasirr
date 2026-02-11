@@ -2,13 +2,14 @@
 include "../config/koneksi.php";
 
 $pelanggan_id = $_POST['pelanggan_id'];
-$produk_id = $_POST['produk_id'];
-$qty = $_POST['qty'];
+$produk_id    = $_POST['produk_id'];
+$qty          = $_POST['qty'];
+$bayar        = $_POST['bayar']; // ambil input bayar dari form
 
 $total = 0;
 
-// simpan transaksi utama
-mysqli_query($conn,"INSERT INTO transaksi (tgl,pelanggan_id,total) VALUES (NOW(),$pelanggan_id,0)");
+// simpan transaksi utama (sementara total = 0)
+mysqli_query($conn,"INSERT INTO transaksi (tgl,pelanggan_id,total,bayar,kembalian) VALUES (NOW(),$pelanggan_id,0,0,0)");
 $transaksi_id = mysqli_insert_id($conn);
 
 // simpan detail transaksi
@@ -32,10 +33,17 @@ foreach($produk_id as $i => $pid){
     mysqli_query($conn,"UPDATE produk SET stok=$stok_baru WHERE id=$pid");
 }
 
-// update total transaksi
-mysqli_query($conn,"UPDATE transaksi SET total=$total WHERE id=$transaksi_id");
+// hitung kembalian
+$kembalian = $bayar - $total;
+if($kembalian < 0){
+    die("Uang bayar kurang! Total belanja Rp$total, bayar Rp$bayar");
+}
+
+// update transaksi dengan total, bayar, kembalian
+mysqli_query($conn,"UPDATE transaksi 
+                    SET total=$total, bayar=$bayar, kembalian=$kembalian 
+                    WHERE id=$transaksi_id");
 
 // redirect ke struk
 header("Location: struk.php?id=$transaksi_id");
-
-
+?>
